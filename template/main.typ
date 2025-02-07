@@ -1,4 +1,4 @@
-#import "@preview/touying-brandred-uobristol:0.1.2": *
+#import "@preview/touying-brandred-uobristol:0.1.3": *
 
 // Specify `lang` and `font` for the theme if needed.
 #show: uobristol-theme.with(

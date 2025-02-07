@@ -66,7 +66,7 @@
     set align(horizon)
     set text(fill: self.colors.neutral-lightest, weight: "bold", size: 1.2em)
     if title != auto {
-      utils.fit-to-width.with(grow: false, 100%, title)
+      utils.fit-to-width(grow: false, 100%, title)
     } else {
       utils.call-or-display(self, self.store.header)
     }
@@ -108,10 +108,12 @@
       text(fill: self.colors.primary, weight: "bold", sym.triangle.r.filled)
     })
     set table(stroke: self.colors.primary)
+    show: pad.with(y: 8pt)
     show: setting
     body
   }
-  touying-slide(self: self, config: config, repeat: repeat, setting: new-setting, composer: multicolumns, ..bodies)
+  let composer = if composer == auto { multicolumns } else { composer }
+  touying-slide(self: self, config: config, repeat: repeat, setting: new-setting, composer: composer, ..bodies)
 })
 
 
@@ -201,7 +203,7 @@
               text(size: 1.2em, self.info.author),
               v(16pt),
               emph(self.info.institution),
-              self.info.date.display(self.datetime-format),
+              self.info.date.display(self.info.datetime-format),
             )
           }
         ))
@@ -253,7 +255,11 @@
       } else if type(marker) == symbol {
         text(fill: self.colors.primary, marker)
       }
-      block(stack(dir: ltr, spacing: .8em, mark, it.body), below: 0pt)
+      if sys.version < version(0, 13) {
+        block(stack(dir: ltr, spacing: .8em, mark, it.body), below: 0pt)
+      } else {
+        block(stack(dir: ltr, spacing: .8em, mark, it.body()), below: 0pt)
+      }
     }
     show: pad.with(x: 1.6em)
     columns(column, outline(title: none, indent: 1em, depth: 1))
@@ -401,9 +407,9 @@
   show: touying-slides.with(
     config-page(
       paper: "presentation-" + aspect-ratio,
-      header-ascent: 30%,
+      header-ascent: 10%,
       footer-descent: 30%,
-      margin: (top: 3em, bottom: 1.5em, x: 2em),
+      margin: (top: 2.4em, bottom: 1.5em, x: 2em),
     ),
     config-common(
       slide-fn: slide,
@@ -411,7 +417,12 @@
     ),
     config-methods(
       init: (self: none, body) => {
-        set text(size: 20pt, font: "Lato")
+        let kwargs = args.named()
+        let font = if "font" in kwargs.keys() { kwargs.font } else { "Arial" }
+        let math-font = if "math-font" in kwargs.keys() { kwargs.math-font } else { "New Computer Modern Math" }
+        let text-size = if "text-size" in kwargs.keys() { kwargs.text-size } else { 20pt }
+        set text(size: text-size, font: font)
+        show math.equation: set text(font: math-font)
         show highlight: body => text(fill: self.colors.primary, strong(body.body))
         body
       },
